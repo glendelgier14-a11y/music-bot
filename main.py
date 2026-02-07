@@ -60,6 +60,7 @@ async def play_next(ctx):
     if guild_id not in queues or len(queues[guild_id]) == 0:
         return
 
+    # Choose the next song based on loop settings
     url = queues[guild_id][0] if loop_song.get(guild_id) else queues[guild_id].pop(0)
     if loop_queue.get(guild_id) and not loop_song.get(guild_id):
         queues[guild_id].append(url)
@@ -71,19 +72,25 @@ async def play_music(ctx, url):
     if not voice:
         return await ctx.send("Bot is not connected to a voice channel.")
 
-    with yt_dlp.YoutubeDL(ytdl_opts) as ytdl:
-        info = ytdl.extract_info(url, download=False)
-        audio_url = info["url"]
+    # Extract audio URL safely
+    try:
+        with yt_dlp.YoutubeDL(ytdl_opts) as ytdl:
+            info = ytdl.extract_info(url, download=False)
+            audio_url = info["url"]
+    except Exception as e:
+        return await ctx.send(f"Error extracting audio: {e}")
 
-    source = FFmpegPCMAudio(
-        audio_url,
-        executable=FFMPEG_PATH,
-        **FFMPEG_OPTIONS
-    )
+    # Create FFmpeg audio source
+    try:
+        source = FFmpegPCMAudio(audio_url, executable=FFMPEG_PATH, **FFMPEG_OPTIONS)
+    except Exception as e:
+        return await ctx.send(f"Error playing audio: {e}")
 
+    # Set volume
     volume = volumes.get(ctx.guild.id, 0.5)
     source = discord.PCMVolumeTransformer(source, volume=volume)
 
+    # Play audio
     voice.play(
         source,
         after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
@@ -108,7 +115,7 @@ async def play(ctx, *, url):
     queues.setdefault(ctx.guild.id, [])
     volumes.setdefault(ctx.guild.id, 0.5)
 
-    # TRACK USER USAGE
+    # Track user usage
     user_id = str(ctx.author.id)
     user_data[user_id] = user_data.get(user_id, 0) + 1
     save_users(user_data)
