@@ -202,4 +202,6 @@ async def help(ctx):
     )
 
 # --- Run Bot ---
-bot.run("MTQ2Nzg3NzY2ODc3NDIxNTcwMw.G0Dg_t.dVsajA39vsjQYI0LJ0sIMuo_Y5ghl5YUXA0RKU")
+import os
+
+bot.run(os.getenv("TOKEN"))
