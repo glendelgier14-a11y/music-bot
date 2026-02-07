@@ -79,6 +79,7 @@ async def play_music(ctx, url):
         before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         options="-vn"
     )
+    voice_channel.play(FFmpegPCMAudio(url, **FFMPEG_OPTIONS))
 
     volume = volumes.get(ctx.guild.id, 0.5)
     source = discord.PCMVolumeTransformer(raw, volume=volume)
@@ -205,5 +206,6 @@ async def help(ctx):
 import os
 
 bot.run(os.getenv("TOKEN"))
+
 
 
