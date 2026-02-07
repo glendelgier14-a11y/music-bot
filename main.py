@@ -4,7 +4,6 @@ import yt_dlp
 import asyncio
 from discord import FFmpegPCMAudio
 import json
-import os
 
 # --- Intents ---
 intents = discord.Intents.default()
@@ -203,5 +202,8 @@ async def help(ctx):
     )
 
 # --- Run Bot ---
+import os
+
 bot.run(os.getenv("TOKEN"))
+
 
